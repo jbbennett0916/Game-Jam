@@ -5,7 +5,16 @@ var config = {
     height: 900,   
     scene: [
         TestScene
-    ]
+    ],
+    scale: {
+        mode: Phaser.Scale.FIT
+    },
+    physics: {
+        default: 'arcade',
+        // arcade: {
+        //     debug: true
+        // }
+    }
 };
     
 var game = new Phaser.Game(config);

@@ -52,12 +52,15 @@ class TestScene extends Phaser.Scene {
         this.load.image('purple_guy', 'enemy1idle1.png');
         this.load.image('dual_wield', 'enemy2idle1.png');
         this.load.image('green_guy', 'enemy3idle1.png');
+        //this.load.image('')
 
         //bullets
         this.load.image('green_bullet', 'bullets1_0023_Circle------------------.png')
 
     }
     create() {
+       this.coinText = this.add.text(1500, 800, "Coins!");
+
         // this graphics element is only for visualization, 
         // its not related to our path
         var pathGraphics = this.add.graphics();
@@ -68,6 +71,7 @@ class TestScene extends Phaser.Scene {
         this.drawPath(pathGraphics);
         //draws a grid
         this.drawGrid(gridGraphics);
+        
 
 
 
@@ -110,7 +114,10 @@ class TestScene extends Phaser.Scene {
                     this.physics.add.collider(bullet, bad, () => {
                         bullet.destroy();
                         bad.destroy();
+                        this.money++;
+                        this.coinText.setText(`Coins x${this.money}`);                     
                         let z = this.spawnedBaddies.indexOf(bad);
+                        //splices z, and the 1 means just one enemy
                         this.spawnedBaddies.splice(z, 1);
                     });
                 }
@@ -118,7 +125,7 @@ class TestScene extends Phaser.Scene {
                     this.physics.moveToObject(bullet, target, 1200);
                     let ng = Phaser.Math.Angle.BetweenPoints(hero, target);
                     ng = Phaser.Math.RadToDeg(ng);
-                    console.log(ng);
+                   // console.log(ng);
                     // -90 on angle because idk Phaser is drunk
                     // Why is setAngle in degrees but the angle calculation
                     // function is in radians? No clue. Good luck. Game hates you.
