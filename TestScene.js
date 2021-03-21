@@ -67,7 +67,7 @@ class TestScene extends Phaser.Scene {
         this.drawPath(pathGraphics);
         //draws a grid
         this.drawGrid(gridGraphics);
-
+        
 
 
         //adds enemies
@@ -89,18 +89,25 @@ class TestScene extends Phaser.Scene {
         }, 1000);
         // this.findBaddie(min, max) {
         // max = Math.floor(max);
+
+        //shoot interval allows all heroes to shoot. 
         this.shootInterval = setInterval(() => {
             for (let i = 0; i < this.placedHeroes.length; i++) {
                 let hero = this.placedHeroes[i];
                 let bullet = this.physics.add.image(hero.x, hero.y, 'green_bullet');
                 bullet.setVelocity(0, -600);
+
+                //this allows our heroes to shoot the baddies
                 for (let j = 0; j < this.spawnedBaddies.length; j++) {
                     let bad = this.spawnedBaddies[j];
                     this.physics.add.collider(bullet, bad, () => {
                         bullet.destroy();
                         bad.destroy();
                     });
-                }
+                } setTimeout(() => {
+                    bullet.destroy()
+
+                },3000)
             }
         }, 500);
 
@@ -115,7 +122,7 @@ class TestScene extends Phaser.Scene {
 
     //stops after 30 monsters are created
     update() {
-        if (this.spawnedThisWave >= 30) {
+        if (this.spawnedThisWave >= 300) {
             clearInterval(this.spawnInterval);
         }
     }
@@ -155,6 +162,7 @@ class TestScene extends Phaser.Scene {
 
     }
 
+    //draws the grid
     drawGrid(graphics) {
         graphics.lineStyle(1, 0x00ff, 1.0);
         for (var i = 0; i < 21; i++) {
@@ -169,11 +177,13 @@ class TestScene extends Phaser.Scene {
         graphics.strokePath();
     }
 
+    //draws the path
     drawPath(graphics) {
         graphics.lineStyle(10, 0x12ff0a, 1);
         this.path.draw(graphics);
     }
 
+    //places a hero on the map
     placeHero(pointer) {
         var i = Math.floor(pointer.y / 64);
         var j = Math.floor(pointer.x / 64);
