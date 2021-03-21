@@ -7,6 +7,7 @@ class TestScene extends Phaser.Scene {
         this.spawnedThisWave = 0;
         this.spawnInterval = null;
         this.shootInterval = null;
+        this.endOfPath = null;
         this.findBaddie = 0;
         this.placedHeroes = [];
         this.spawnedBaddies = [];
@@ -67,7 +68,7 @@ class TestScene extends Phaser.Scene {
         this.drawPath(pathGraphics);
         //draws a grid
         this.drawGrid(gridGraphics);
-        
+
 
 
         //adds enemies
@@ -95,19 +96,43 @@ class TestScene extends Phaser.Scene {
             for (let i = 0; i < this.placedHeroes.length; i++) {
                 let hero = this.placedHeroes[i];
                 let bullet = this.physics.add.image(hero.x, hero.y, 'green_bullet');
-                bullet.setVelocity(0, -600);
 
                 //this allows our heroes to shoot the baddies
+                let min = 500;
+                let target = null;
                 for (let j = 0; j < this.spawnedBaddies.length; j++) {
                     let bad = this.spawnedBaddies[j];
+                    let d = Phaser.Math.Distance.BetweenPoints(bullet, bad);
+                    if (d < min) {
+                        min = d;
+                        target = bad;
+                    }
                     this.physics.add.collider(bullet, bad, () => {
                         bullet.destroy();
                         bad.destroy();
+                        let z = this.spawnedBaddies.indexOf(bad);
+                        this.spawnedBaddies.splice(z, 1);
                     });
-                } setTimeout(() => {
-                    bullet.destroy()
+                }
+                if (target) {
+                    this.physics.moveToObject(bullet, target, 1200);
+                    let ng = Phaser.Math.Angle.BetweenPoints(hero, target);
+                    ng = Phaser.Math.RadToDeg(ng);
+                    console.log(ng);
+                    // -90 on angle because idk Phaser is drunk
+                    // Why is setAngle in degrees but the angle calculation
+                    // function is in radians? No clue. Good luck. Game hates you.
+                    hero.setAngle(ng - 90);
+                    bullet.setAngle(ng - 90);
+                } else {
+                    bullet.destroy();
+                }
+                // console.log(min, target);
 
-                },3000)
+                setTimeout(() => {
+                    bullet.destroy()
+                }, 3000)
+
             }
         }, 500);
 
@@ -122,7 +147,7 @@ class TestScene extends Phaser.Scene {
 
     //stops after 30 monsters are created
     update() {
-        if (this.spawnedThisWave >= 300) {
+        if (this.spawnedThisWave >= 20) {
             clearInterval(this.spawnInterval);
         }
     }
@@ -138,6 +163,10 @@ class TestScene extends Phaser.Scene {
         this.path.lineTo(1200, 650);
         this.path.lineTo(1400, 650);
         this.path.lineTo(1400, 900);
+        this.endOfPath = this.physics.add.image(1400, 900, 'ancient');
+        this.endOfPath.setScale(0.15);
+        this.endOfPath.setAlpha(0.7);
+
     }
 
     //adds an enemy
@@ -149,6 +178,9 @@ class TestScene extends Phaser.Scene {
         follower.setScale(0.15);
         follower.startFollow(duration);
         this.spawnedBaddies.push(follower);
+        this.physics.add.collider(follower, this.endOfPath, ()=>{
+            this.scene.restart();
+        });
     }
 
     //adds a hero
